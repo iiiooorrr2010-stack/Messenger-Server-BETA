@@ -49,9 +49,9 @@ public class User {
     @Min(value = 1, message = "Возраст должен быть больше 0")
     @Max(value = 100, message = "Возраст должен быть меньше 120")
     private Integer age;
-    @Column(nullable = false)
+    @Column(nullable = true, name = "userStatus")
     @Enumerated(EnumType.STRING)
-    private UserStatus userStatus = UserStatus.OFFLINE;
-    @Column(nullable = false)
+    private UserStatus userStatus;
+    @Column(nullable = false, name = "last_online")
     private Instant lastOnline = Instant.now();
 }

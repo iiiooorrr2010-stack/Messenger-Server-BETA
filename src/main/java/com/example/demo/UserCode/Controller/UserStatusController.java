@@ -1,6 +1,6 @@
 package com.example.demo.UserCode.Controller;
 
-import com.example.demo.UtilCode.Exception.UserNotFound;
+import com.example.demo.UtilCode.Exception.UserNotFoundWithId;
 import com.example.demo.UserCode.UserRepository.UsersRepository;
 import com.example.demo.UserCode.UserModel.User;
 import com.example.demo.UserCode.UserModel.UserStatus;
@@ -17,14 +17,14 @@ public class UserStatusController {
     public User UserOnline(String id) {
         User user = usersRepository.findById(id)
                 .orElseThrow(()
-                        -> new UserNotFound());
+                        -> new UserNotFoundWithId(id));
         user.setUserStatus(UserStatus.ONLINE);
         return usersRepository.save(user);
     }
     public User UserOffline(String id) {
         User user = usersRepository.findById(id)
                 .orElseThrow(()
-                        -> new UserNotFound());
+                        -> new UserNotFoundWithId(id));
         user.setLastOnline(Instant.now());
         user.setUserStatus(UserStatus.OFFLINE);
         return usersRepository.save(user);
@@ -32,7 +32,7 @@ public class UserStatusController {
     public User UserIDLE(String id) {
         User user = usersRepository.findById(id)
                 .orElseThrow(()
-                        -> new UserNotFound());
+                        -> new UserNotFoundWithId(id));
         user.setUserStatus(UserStatus.IDLE);
         return usersRepository.save(user);
     }

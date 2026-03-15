@@ -1,4 +1,4 @@
-package com.example.demo.Kafka.Consumer;
+package com.example.demo.UtilCode.Kafka.Consumer;
 import com.example.demo.UtilCode.WebSocket.MessageSocketController;
 import com.example.demo.UtilCode.MessageModel.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
