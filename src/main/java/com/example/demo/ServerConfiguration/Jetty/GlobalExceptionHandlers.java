@@ -1,4 +1,4 @@
-package com.example.demo.ServerConfiguration.TomCat;
+package com.example.demo.ServerConfiguration.Jetty;
 
 import com.example.demo.Exception.ChangeNullUser;
 import com.example.demo.Exception.PasswordIsIncorrected;

@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
-
 @Controller
 public class TextMessageController {
         @Autowired
         private Message message;
         //Получаем от клиента на send и в случае userStatus == Online сразу передаем
         @MessageMapping("/chat/send")
-        public void getMessagee(@Valid @Payload TextMessage textMessage) {
+        public void getMessage(@Valid @Payload TextMessage textMessage) {
                message.sendText(textMessage);
         }
 

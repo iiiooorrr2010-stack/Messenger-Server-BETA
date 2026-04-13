@@ -5,13 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 
 @Entity
 @Table(name = "UserData")
 @Data
 
-public class User {
+public class User implements UserDetails {
 
     @Id
 
@@ -43,4 +48,19 @@ public class User {
     @Column(nullable = true, name = "userStatus")
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
+
+    @Override
+    public String getUsername() {
+        return this.nickname;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
 }

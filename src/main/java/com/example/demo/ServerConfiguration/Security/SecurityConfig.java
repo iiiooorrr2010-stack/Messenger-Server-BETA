@@ -1,13 +1,16 @@
 package com.example.demo.ServerConfiguration.Security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,16 +23,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(final HttpSecurity http, JWToken jwt) throws Exception{
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->  session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/register", "/api/user/login", "/public//**")
+                        .requestMatchers("/user/register", "/user/login", "/user/auth", "/ping", "/ws/**")
                                 .permitAll()
                                     .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .anonymous(an -> an.authorities("ROLE_GUEST"));
+                .httpBasic(Customizer.withDefaults());
+        http.addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

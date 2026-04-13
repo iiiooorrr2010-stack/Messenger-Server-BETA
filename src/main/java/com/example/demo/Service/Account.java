@@ -4,6 +4,7 @@ import com.example.demo.Exception.PasswordIsIncorrected;
 import com.example.demo.Exception.UserNameIndexNotFound;
 import com.example.demo.Exception.UserNotFoundWithId;
 import com.example.demo.Exception.UsernameExists;
+import com.example.demo.ServerConfiguration.Security.JwtService;
 import com.example.demo.ServerConfiguration.Security.PasswordManager;
 import com.example.demo.UnitModel.UserModel.User;
 import com.example.demo.UnitModel.UserModel.UserStatus;
@@ -14,22 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
 @Slf4j
 public class Account {
     @Autowired
+    private JwtService jwtService;
+    @Autowired
     private UsersRepository usersRepository;
     @Autowired
     private PasswordManager passwordManager;
-    @Transactional
-    public User create(@Valid User user) {
+    private User create(User user) {
     user.setId(UUID.randomUUID().toString());
     user.setPassword(passwordManager.create(user.getPassword()));
     user.setUserStatus(UserStatus.OFFLINE);
+    validateUser(user);
     usersRepository.save(user);
            return getUser(user.getId());
     }
@@ -43,10 +45,8 @@ public class Account {
         }
 
         if (!oldUser.getNickname().equals(changeUser.getNickname())) {
-            List<User> haveName = usersRepository.findByNickname(changeUser.getNickname());
-            if (!haveName.isEmpty()) {
-                throw new UsernameExists(changeUser.getNickname());
-            }
+            User haveName = usersRepository.findByNickname(changeUser.getNickname());
+            throw new UsernameExists(changeUser.getNickname());
         }
         changeUser.setPassword(passwordManager.create(changeUser.getPassword()));
         return usersRepository.save(changeUser);
@@ -54,11 +54,15 @@ public class Account {
 
 
     public User getUser(String id) {
+        log.info("Looking for user with id: {}", id);
         return usersRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundWithId(id));
     }
 
-
+    public User getUserByNick(String name) {
+        log.info("get user, nick {}", name);
+        return usersRepository.findByNickname(name);
+    }
 
 
     public void changeUserStatus(String id, UserStatus сonnectionType) {
@@ -71,16 +75,34 @@ public class Account {
         usersRepository.save(user);
     }
 
-    public User loginUser(String name, String password) {
-
-        List<User> userList = usersRepository.findByNickname(name);
-        if (userList.isEmpty()) {
-            throw new UserNameIndexNotFound(name);
-        }
-        User user = userList.getFirst();
-        if (!passwordManager.compare(password, user.getPassword())) {
+    private User loginUser(String name, String password) {
+        log.info("LOGGGG USER ");
+        User user = usersRepository.findByNickname(name);
+        log.info("Found user: id={}, nickname={}, password={}", user.getId(), user.getNickname(), user.getPassword());
+        if (!passwordManager.compare(password, user.getId())) {
             throw new PasswordIsIncorrected(name);
         }
         return user;
+    }
+    @Transactional
+    public Map<String, String> loginWithToken(String name, String password) {
+        User user = loginUser(name, password);
+        log.info("Found user: id={}, nickname={}, password={}", user.getId(), user.getNickname(), user.getPassword());
+        String token = jwtService.generateToken(user.getId(), user.getNickname());
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        return response;
+    }
+    @Transactional
+    public Map<String, String> authWithToken(User user) {
+        user = create(user);
+        String token = jwtService.generateToken(user.getId(), user.getNickname());
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        return response;
+    }
+
+    private void validateUser(@Valid User user) {
+
     }
 }

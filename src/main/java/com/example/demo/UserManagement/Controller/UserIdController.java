@@ -22,13 +22,13 @@ public class UserIdController {
  public ResponseEntity<User> httpUserChange(@PathVariable String id, @RequestBody @Valid User changeUser) {
         return ResponseEntity.ok(account.changeUser(changeUser));
     }
-    @GetMapping("/login/user")
- public ResponseEntity<User> httpLoginAccount(@RequestBody LoginDTO loginDTO) {
-        return ResponseEntity.ok(account.loginUser(loginDTO.getName(), loginDTO.getPassword()));
+    @PostMapping("/user/login")
+ public ResponseEntity<?> httpLoginAccount(@RequestBody @Valid LoginDTO user) {
+        return ResponseEntity.ok(account.loginWithToken(user.getName(), user.getPassword()));
     }
 
-   @PostMapping("/auth/user")
- public ResponseEntity<User> httpCreateAccount(@RequestBody @Valid User user) {
-        return ResponseEntity.ok(account.create(user));
+   @PostMapping("/user/register")
+ public ResponseEntity<?> httpCreateAccount(@RequestBody User user) {
+        return ResponseEntity.ok(account.authWithToken(user));
    }
 }
